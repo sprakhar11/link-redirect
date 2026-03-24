@@ -1,0 +1,11 @@
+node_modules/
+tests/
+package.json
+package-lock.json
+.kiro/
+.idea/
+*.iml
+.vscode/
+README.md
+PUBLISHING.md
+chrome-link-redirect.zip

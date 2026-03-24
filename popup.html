@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrome Link Redirect</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <h1>Link Redirect</h1>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <button id="add-rule-btn" type="button" aria-label="Add a new redirect rule">+ Add Rule</button>
+    </div>
+
+    <div id="rules-container" role="list" aria-label="Redirect rules"></div>
+  </main>
+
+  <!-- Template for a single rule entry, cloned by popup.js -->
+  <template id="rule-template">
+    <div class="rule-entry" role="listitem" data-rule-id="">
+      <div class="rule-fields">
+        <div class="field-group">
+          <label>
+            <span class="field-label">Pattern (regex)</span>
+            <input
+              type="text"
+              class="rule-pattern"
+              placeholder="Leave empty for new tab, or regex"
+              aria-describedby=""
+              spellcheck="false"
+              autocomplete="off"
+            >
+          </label>
+          <span class="error-message pattern-error" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="field-group">
+          <label>
+            <span class="field-label">Destination URL</span>
+            <input
+              type="text"
+              class="rule-destination"
+              placeholder="https://other.com/$1"
+              aria-describedby=""
+              spellcheck="false"
+              autocomplete="off"
+            >
+          </label>
+          <span class="error-message destination-error" role="alert" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="rule-actions">
+        <label class="toggle-label">
+          <input type="checkbox" class="rule-toggle" checked aria-label="Enable rule">
+          <span class="toggle-switch"></span>
+        </label>
+        <button type="button" class="delete-rule-btn" aria-label="Delete rule">&times;</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
