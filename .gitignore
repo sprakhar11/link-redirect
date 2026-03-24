@@ -6,6 +6,5 @@ package-lock.json
 .idea/
 *.iml
 .vscode/
-README.md
 PUBLISHING.md
 chrome-link-redirect.zip
