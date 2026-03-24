@@ -25,11 +25,16 @@
       <div class="rule-fields">
         <div class="field-group">
           <label>
-            <span class="field-label">Pattern (regex)</span>
+            <span class="field-label">
+              <select class="rule-mode" aria-label="Pattern mode">
+                <option value="ilike">ILIKE pattern</option>
+                <option value="regex">Regex</option>
+              </select>
+            </span>
             <input
               type="text"
               class="rule-pattern"
-              placeholder="Leave empty for new tab, or regex"
+              placeholder="Leave empty for new tab, or *shorts*"
               aria-describedby=""
               spellcheck="false"
               autocomplete="off"

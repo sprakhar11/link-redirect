@@ -48,7 +48,9 @@ function handleNavigation(details) {
     return;
   }
 
-  const pattern = new RegExp(matchingRule.pattern);
+  const pattern = matchingRule.mode === "ilike"
+    ? ilikeToRegex(matchingRule.pattern)
+    : new RegExp(matchingRule.pattern);
   let newUrl = applySubstitution(details.url, pattern, matchingRule.destination);
 
   // Auto-prepend https:// if the destination has no protocol scheme
@@ -57,6 +59,21 @@ function handleNavigation(details) {
   }
 
   chrome.tabs.update(details.tabId, { url: newUrl });
+}
+
+/**
+ * Convert an ILIKE pattern to a RegExp.
+ * % = any characters (.*), _ = single character (.)
+ * Matching is case-insensitive.
+ * @param {string} pattern - ILIKE pattern string.
+ * @returns {RegExp} Compiled regex.
+ */
+function ilikeToRegex(pattern) {
+  // Normalize * to % so users can use either wildcard style
+  const normalized = pattern.replace(/\*/g, "%");
+  const escaped = normalized.replace(/([.+?^${}()|[\]\\])/g, "\\$1");
+  const regexStr = "^" + escaped.replace(/%/g, "(.*)").replace(/_/g, "(.)") + "$";
+  return new RegExp(regexStr, "i");
 }
 
 /**
@@ -81,10 +98,14 @@ function findMatchingRule(url, ruleList) {
 
     let regex;
     try {
-      regex = new RegExp(rule.pattern);
+      if (rule.mode === "ilike") {
+        regex = ilikeToRegex(rule.pattern);
+      } else {
+        regex = new RegExp(rule.pattern);
+      }
     } catch (e) {
       console.warn(
-        `Skipping rule "${rule.id}": invalid regex pattern "${rule.pattern}" — ${e.message}`
+        `Skipping rule "${rule.id}": invalid pattern "${rule.pattern}" — ${e.message}`
       );
       continue;
     }
@@ -176,6 +197,7 @@ if (typeof module !== "undefined" && module.exports) {
     handleNavigation,
     findMatchingRule,
     applySubstitution,
+    ilikeToRegex,
     checkRedirectLoop,
     resetRedirectTracker,
     redirectTracker,

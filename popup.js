@@ -14,13 +14,18 @@ const DEBOUNCE_DELAY = 300;
 // --- Placeholder Validation (fully implemented in task 5.4) ---
 
 /**
- * Validate a regex pattern string.
+ * Validate a pattern string based on mode.
  * @param {string} pattern
+ * @param {string} [mode="regex"]
  * @returns {string|null} Error message or null if valid.
  */
-function validatePattern(pattern) {
+function validatePattern(pattern, mode) {
   // Empty pattern is valid — it means "match new tab"
   if (!pattern || pattern.trim() === "") {
+    return null;
+  }
+  if (mode === "ilike") {
+    // ILIKE patterns are always valid syntax-wise
     return null;
   }
   try {
@@ -62,6 +67,7 @@ async function addRule() {
     pattern: "",
     destination: "",
     enabled: true,
+    mode: "ilike",
   };
   rules.push(newRule);
   await setRules(rules);
@@ -126,7 +132,7 @@ function onFieldInput(ruleId, field, value) {
   if (entry) {
     if (field === "pattern") {
       const errorSpan = entry.querySelector(".pattern-error");
-      const error = validatePattern(value);
+      const error = validatePattern(value, rule.mode);
       if (errorSpan) errorSpan.textContent = error || "";
     } else if (field === "destination") {
       const errorSpan = entry.querySelector(".destination-error");
@@ -136,7 +142,7 @@ function onFieldInput(ruleId, field, value) {
   }
 
   // Check both fields — skip save if either has validation errors
-  const patternError = validatePattern(rule.pattern);
+  const patternError = validatePattern(rule.pattern, rule.mode);
   const destinationError = validateDestination(rule.destination);
   if (patternError || destinationError) {
     // Clear any pending save timer since we won't save
@@ -179,8 +185,28 @@ function renderRules() {
       entry.classList.add("disabled");
     }
 
+    const modeSelect = entry.querySelector(".rule-mode");
+    const ruleMode = rule.mode || "ilike";
+    modeSelect.value = ruleMode;
+
     const patternInput = entry.querySelector(".rule-pattern");
     patternInput.value = rule.pattern;
+    patternInput.placeholder = ruleMode === "ilike"
+      ? "Leave empty for new tab, or *shorts*"
+      : "Leave empty for new tab, or regex";
+
+    modeSelect.addEventListener("change", async (e) => {
+      rule.mode = e.target.value;
+      patternInput.placeholder = rule.mode === "ilike"
+        ? "Leave empty for new tab, or *shorts*"
+        : "Leave empty for new tab, or regex";
+      // Re-validate pattern with new mode
+      const errorSpan = entry.querySelector(".pattern-error");
+      const error = validatePattern(rule.pattern, rule.mode);
+      if (errorSpan) errorSpan.textContent = error || "";
+      await saveRules();
+    });
+
     patternInput.addEventListener("input", (e) => {
       onFieldInput(rule.id, "pattern", e.target.value);
     });
